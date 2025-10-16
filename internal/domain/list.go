@@ -7,15 +7,17 @@ import (
 )
 
 type List struct {
-	ID        string    `json:"id"`
-	Title     string    `json:"title"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
-func NewList(title string) *List {
+func NewList(title, description string) *List {
 	return &List{
-		ID:        uuid.New().String(),
-		Title:     title,
-		CreatedAt: time.Now(),
+		ID:          uuid.New().String(),
+		Title:       title,
+		Description: description,
+		CreatedAt:   time.Now(),
 	}
 }

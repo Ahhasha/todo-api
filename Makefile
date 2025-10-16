@@ -1,3 +1,24 @@
+DB_URL=postgres://todo_user:todo_password@localhost:5432/todo_db?sslmode=disable
+
+
+migrate-up:
+    migrate -path migrations -database "$(DB_URL)" up
+
+# Откатить одну миграцию
+migrate-down:
+    migrate -path migrations -database "$(DB_URL)" down 1
+
+# Создать новую миграцию
+# Использование: make migrate-create NAME=add_items_table
+migrate-create:
+    migrate create -ext sql -dir migrations -seq $(NAME)
+
+# Версия миграций
+migrate-version:
+    migrate -path migrations -database "$(DB_URL)" version
+
+.PHONY: migrate-up migrate-down migrate-create migrate-version
+
 run:
 	go run ./cmd/todo-api
 
@@ -6,3 +27,5 @@ build:
 
 tidy:
 	go mod tidy
+
+	# Переменные

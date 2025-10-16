@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+
 	"todo-api/internal/service"
 
 	"github.com/go-chi/chi/v5"
@@ -20,14 +21,15 @@ func NewListHandler(s service.ListService) *ListHandler {
 func (h *ListHandler) CreateList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var req struct {
-		Title string `json:"title"`
+		Title       string `json:"title"`
+		Description string `json:"description"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, `{"code":"VALIDATION_FAILED","message":"invalid json","details":{}}`, http.StatusBadRequest)
 		return
 	}
 
-	list, err := h.svc.CreateList(ctx, req.Title)
+	list, err := h.svc.CreateList(ctx, req.Title, req.Description)
 	if err != nil {
 		http.Error(w, `{"code":"VALIDATION_FAILED","message":"title must be 1..100 chars","details":{}}`, http.StatusBadRequest)
 		return
@@ -109,4 +111,26 @@ func (h *ListHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *ListHandler) SearchLists(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("title")
+	if query == "" {
+		http.Error(w, "missing title parameter", http.StatusBadRequest)
+		return
+	}
+
+	lists, err := h.svc.SearchByTitle(r.Context(), query)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(lists) == 0 {
+		http.Error(w, "list not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(lists)
 }
