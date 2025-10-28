@@ -81,17 +81,18 @@ func (h *ListHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(list)
 }
 
-func (h *ListHandler) UpdateTitle(w http.ResponseWriter, r *http.Request) {
+func (h *ListHandler) UpdateList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
 	var req struct {
-		Title string `json:"title"`
+		Title       string `json:"title"`
+		Description string `json:"description"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, `{"code":"VALIDATION_FAILED","message":"invalid json","details":{}}`, http.StatusBadRequest)
 		return
 	}
-	list, err := h.svc.UpdateTitle(ctx, id, req.Title)
+	list, err := h.svc.UpdateList(ctx, id, req.Title, req.Description)
 	if err != nil {
 		http.Error(w, `{"code":"VALIDATION_FAILED","message":"title must be 1..100 chars","details":{}}`, http.StatusBadRequest)
 		return

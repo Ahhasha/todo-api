@@ -23,7 +23,7 @@ func NewListRepo(pool *pgxpool.Pool) *ListRepo {
 	return &ListRepo{pool: pool}
 }
 
-func (r *ListRepo) Create(ctx context.Context, list *domain.List) error {
+func (r *ListRepo) Create(ctx context.Context, list *domain.List) (*domain.List, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
@@ -33,7 +33,12 @@ func (r *ListRepo) Create(ctx context.Context, list *domain.List) error {
         VALUES ($1, $2, $3)
         RETURNING created_at
     `
-	return r.pool.QueryRow(ctx, query, list.ID, list.Title, list.Description).Scan(&list.CreatedAt)
+	err := r.pool.QueryRow(ctx, query, list.ID, list.Title, list.Description).Scan(&list.CreatedAt)
+	if err != nil {
+		return list, fmt.Errorf("create list: %w", err)
+	}
+
+	return list, nil
 }
 
 func (r *ListRepo) GetByID(ctx context.Context, id string) (*domain.List, error) {
@@ -66,9 +71,9 @@ func (r *ListRepo) Update(ctx context.Context, list *domain.List) error {
         UPDATE lists
         SET title = $2, description = $3
         WHERE id = $1
-        RETURNING created_at
+        RETURNING id, title, description, created_at
     `
-	return r.pool.QueryRow(ctx, query, list.ID, list.Title, list.Description).Scan(&list.CreatedAt)
+	return r.pool.QueryRow(ctx, query, list.ID, list.Title, list.Description).Scan(&list.ID, &list.Title, &list.Description, &list.CreatedAt)
 }
 
 func (r *ListRepo) Delete(ctx context.Context, id string) error {

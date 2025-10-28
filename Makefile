@@ -1,6 +1,5 @@
 DB_URL=postgres://todo_user:todo_password@localhost:5432/todo_db?sslmode=disable
 
-
 migrate-up:
     migrate -path migrations -database "$(DB_URL)" up
 
@@ -27,5 +26,3 @@ build:
 
 tidy:
 	go mod tidy
-
-	# Переменные

@@ -12,6 +12,7 @@ import (
 	"todo-api/internal/config"
 	"todo-api/internal/database"
 	httphandlers "todo-api/internal/http"
+	"todo-api/internal/http/handlers"
 	"todo-api/internal/service"
 	"todo-api/internal/storage/postgres"
 )
@@ -21,7 +22,6 @@ func main() {
 
 	ctx := context.Background()
 
-	// Подключаемся к PostgreSQL
 	log.Println("Connecting to database...")
 	pool, err := database.NewPool(ctx, cfg.DatabaseURL())
 	if err != nil {
@@ -30,16 +30,17 @@ func main() {
 	defer pool.Close()
 	log.Println("Connected to database")
 
-	// Создаем репозиторий PostgreSQL
 	repo := postgres.NewListRepo(pool)
+	taskRepo := postgres.NewTaskRepo(pool)
 
-	// Создаем сервис
 	svc := service.NewListService(repo)
+	taskSvc := service.NewTaskService(taskRepo, repo)
 
-	// Создаем HTTP-роутер
-	router := httphandlers.NewRouter(svc)
+	listHandler := handlers.NewListHandler(svc)
+	taskHandler := handlers.NewTaskHandler(taskSvc)
 
-	// Создаем HTTP-сервер
+	router := httphandlers.NewRouter(listHandler, taskHandler)
+
 	server := &http.Server{
 		Addr:         ":" + cfg.Port,
 		Handler:      router,
@@ -48,7 +49,6 @@ func main() {
 		IdleTimeout:  60 * time.Second,
 	}
 
-	// Запускаем сервер в горутине
 	go func() {
 		log.Printf("Starting server on port %s...", cfg.Port)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -56,7 +56,6 @@ func main() {
 		}
 	}()
 
-	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit

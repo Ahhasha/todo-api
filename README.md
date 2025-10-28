@@ -66,15 +66,15 @@ go run ./cmd/todo-api
 
 Пример:
 
-curl -sS -X POST http://localhost:8080/api/v1/lists \
+curl -X POST http://localhost:8080/api/v1/lists \
   -H "Content-Type: application/json" \
-  -d '{"title":"Домашние дела"}'
+  -d '{"title":"Покупки", "description":"Список для покупок в супермаркете"}'
 
 Ответ:
 
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "title": "Домашние дела",
+  "title": "Покупки", "description":"Список для покупок в супермаркете",
   "created_at": "2025-09-20T14:00:00Z"
 }
 
@@ -115,15 +115,15 @@ curl -sS http://localhost:8080/api/v1/lists/550e8400-e29b-41d4-a716-446655440000
 
 Пример:
 
-curl -sS -X PATCH http://localhost:8080/api/v1/lists/550e8400-e29b-41d4-a716-446655440000 \
+curl -sS -X PATCH http://localhost:8080/api/v1/lists/5fdbf08c-1bc8-4c85-8af7-79a13a94a7f0 \
   -H "Content-Type: application/json" \
-  -d '{"title":"Покупки"}'
+  -d '{"title":"Study plan", "description":"1.Math 2.Pupa"}'
 
 Ответ:
 
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
-  "title": "Покупки",
+  "title": "Покупки", "description":"Список для покупок в супермаркете"
   "created_at": "2025-09-20T14:00:00Z"
 }
 

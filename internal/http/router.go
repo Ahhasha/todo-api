@@ -5,15 +5,12 @@ import (
 
 	"todo-api/internal/http/handlers"
 	"todo-api/internal/http/middleware"
-	"todo-api/internal/service"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func NewRouter(listService service.ListService) http.Handler {
+func NewRouter(listHandler *handlers.ListHandler, taskHandler *handlers.TaskHandler) http.Handler {
 	r := chi.NewRouter()
-
-	listHandler := handlers.NewListHandler(listService)
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logging)
@@ -24,10 +21,20 @@ func NewRouter(listService service.ListService) http.Handler {
 			r.Get("/", listHandler.GetAllLists)
 			r.Get("/search", listHandler.SearchLists)
 			r.Get("/{id}", listHandler.GetByID)
-			r.Patch("/{id}", listHandler.UpdateTitle)
+			r.Patch("/{id}", listHandler.UpdateList)
 			r.Delete("/{id}", listHandler.Delete)
 		})
+		r.Route("/api/v1/lists/{listID}/tasks", func(r chi.Router) {
+			r.Post("/", taskHandler.CreateTask)
+			r.Get("/", taskHandler.ListTasks)
+		})
 
+	})
+
+	r.Route("/api/v1/tasks/{taskID}", func(r chi.Router) {
+		r.Get("/", taskHandler.GetTask)
+		r.Patch("/", taskHandler.UpdateTask)
+		r.Delete("/", taskHandler.DeleteTask)
 	})
 
 	r.Get("/openapi.yaml", handlers.OpenAPISpec)
