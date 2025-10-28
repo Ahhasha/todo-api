@@ -7,6 +7,7 @@ import (
 	"todo-api/internal/http/middleware"
 
 	"github.com/go-chi/chi/v5"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func NewRouter(listHandler *handlers.ListHandler, taskHandler *handlers.TaskHandler) http.Handler {
@@ -38,7 +39,7 @@ func NewRouter(listHandler *handlers.ListHandler, taskHandler *handlers.TaskHand
 	})
 
 	r.Get("/openapi.yaml", handlers.OpenAPISpec)
-
+	r.Get("/swagger/index.html", httpSwagger.WrapHandler)
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})

@@ -11,7 +11,7 @@ RUN go mod download
 COPY . .
 
 # Собираем бинарник
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/service ./cmd/todo-api
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/service ./cmd
 
 # Этап 2: Минимальный образ для запуска
 FROM alpine:latest

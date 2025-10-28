@@ -1,21 +1,23 @@
 openapi: 3.0.3
 info:
-  title: Lists API
+  title: "Lists and Tasks API"
   version: "1.0.0"
-  description: REST API для управления списками (CRUD, in-memory)
+  description: "API для управления списками и задачами (CRUD, in-memory)"
 servers:
   - url: http://localhost:8080
 tags:
   - name: Lists
-    description: Операции со списками
+    description: "Операции со списками"
+  - name: Tasks
+    description: "Операции с задачами"
   - name: Health
-    description: Проверка состояния сервиса
+    description: "Проверка состояния сервиса"
 paths:
   /api/v1/lists:
     post:
       tags: [Lists]
       operationId: createList
-      summary: Создать список
+      summary: "Создать список"
       requestBody:
         required: true
         content:
@@ -28,7 +30,7 @@ paths:
                   title: Дом
       responses:
         '201':
-          description: Создано
+          description: "Создано"
           content:
             application/json:
               schema:
@@ -40,13 +42,13 @@ paths:
     get:
       tags: [Lists]
       operationId: listLists
-      summary: Получить списки
+      summary: "Получить списки"
       parameters:
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
       responses:
         '200':
-          description: Ок
+          description: "Ок"
           content:
             application/json:
               schema:
@@ -60,12 +62,12 @@ paths:
     get:
       tags: [Lists]
       operationId: getList
-      summary: Получить список по id
+      summary: "Получить список по id"
       parameters:
         - $ref: '#/components/parameters/Id'
       responses:
         '200':
-          description: Ок
+          description: "Ок"
           content:
             application/json:
               schema:
@@ -77,7 +79,7 @@ paths:
     patch:
       tags: [Lists]
       operationId: updateList
-      summary: Обновить title списка
+      summary: "Обновить title списка"
       parameters:
         - $ref: '#/components/parameters/Id'
       requestBody:
@@ -92,7 +94,7 @@ paths:
                   title: Домашние дела
       responses:
         '200':
-          description: Ок
+          description: "Ок"
           content:
             application/json:
               schema:
@@ -106,31 +108,148 @@ paths:
     delete:
       tags: [Lists]
       operationId: deleteList
-      summary: Удалить список
+      summary: "Удалить список"
       parameters:
         - $ref: '#/components/parameters/Id'
       responses:
         '204':
-          description: Удалено
+          description: "Удалено"
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
 
-  /health:
-    get:
-      tags: [Health]
-      operationId: health
-      summary: Проверка здоровья сервиса
+  /api/v1/lists/{listID}/tasks:
+    post:
+      tags: [Tasks]
+      operationId: createTask
+      summary: "Создать задачу в списке"
+      parameters:
+        - name: "listID"
+          in: "path"
+          description: "ID списка, к которому добавляется задача"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: "Информация о новой задаче"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskRequest"
       responses:
-        '200':
-          description: Ок
+        '201':
+          description: "Задача успешно создана"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Health'
-        '500':
-          $ref: '#/components/responses/ServerError'
+                $ref: "#/components/schemas/Task"
+        '400':
+          description: "Некорректный запрос"
+        '404':
+          description: "Список не найден"
+    get:
+      tags: [Tasks]
+      operationId: getTasks
+      summary: "Получить все задачи в списке"
+      parameters:
+        - name: "listID"
+          in: "path"
+          description: "ID списка для получения задач"
+          required: true
+          schema:
+            type: string
+        - name: "limit"
+          in: "query"
+          description: "Количество задач для получения"
+          required: false
+          schema:
+            type: integer
+        - name: "offset"
+          in: "query"
+          description: "Смещение задач"
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: "Список задач"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+        '404':
+          description: "Список не найден"
+
+  /api/v1/tasks/{taskID}:
+    get:
+      tags: [Tasks]
+      operationId: getTask
+      summary: "Получить задачу по ID"
+      parameters:
+        - name: "taskID"
+          in: "path"
+          description: "ID задачи"
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: "Задача успешно найдена"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        '404':
+          description: "Задача не найдена"
+    patch:
+      tags: [Tasks]
+      operationId: updateTask
+      summary: "Обновить задачу"
+      parameters:
+        - name: "taskID"
+          in: "path"
+          description: "ID задачи для обновления"
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: "Данные для обновления задачи"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaskRequest"
+      responses:
+        '200':
+          description: "Задача обновлена"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        '400':
+          description: "Некорректный запрос"
+        '404':
+          description: "Задача не найдена"
+    delete:
+      tags: [Tasks]
+      operationId: deleteTask
+      summary: "Удалить задачу"
+      parameters:
+        - name: "taskID"
+          in: "path"
+          description: "ID задачи для удаления"
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: "Задача успешно удалена"
+        '404':
+          description: "Задача не найдена"
 
 components:
   parameters:
@@ -201,60 +320,81 @@ components:
           minLength: 1
           maxLength: 100
 
+    Task:
+      type: object
+      required: [id, list_id, text, created_at, updated_at]
+      properties:
+        id:
+          type: string
+        list_id:
+          type: string
+        text:
+          type: string
+        completed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateTaskRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 500
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 500
+        completed:
+          type: boolean
+
     Error:
       type: object
       required: [code, message]
       properties:
         code:
           type: string
-          description: Машинный код ошибки
         message:
           type: string
-          description: Человекочитаемое описание
         details:
-          description: Дополнительные сведения
+          type: string
       example:
-        code: VALIDATION_FAILED
-        message: title must be 1..100 chars
+        code: "VALIDATION_FAILED"
+        message: "title must be 1..100 chars"
 
     Health:
       type: object
       properties:
         status:
           type: string
-          example: ok
+          example: "ok"
 
   responses:
     NotFound:
-      description: Не найдено
+      description: "Не найдено"
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            example:
-              value:
-                code: NOT_FOUND
-                message: list not found
+            $ref: "#/components/schemas/Error"
     ValidationError:
-      description: Ошибка валидации запроса
+      description: "Ошибка валидации"
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            example:
-              value:
-                code: VALIDATION_FAILED
-                message: title must be 1..100 chars
+            $ref: "#/components/schemas/Error"
     ServerError:
-      description: Внутренняя ошибка сервера
+      description: "Ошибка сервера"
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
-          examples:
-            example:
-              value:
-                code: INTERNAL_ERROR
-                message: unexpected error
+            $ref: "#/components/schemas/Error"
