@@ -25,6 +25,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: todo-api
+    restart: always 
     environment:
       PORT: 8080
       DB_HOST: postgres
@@ -37,6 +38,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ./docs:/app/docs 
 
 volumes:
   postgres_data:

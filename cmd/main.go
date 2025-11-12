@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	_ "todo-api/docs"
 	"todo-api/internal/config"
 	"todo-api/internal/database"
 	httphandlers "todo-api/internal/http"

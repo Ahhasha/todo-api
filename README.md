@@ -165,3 +165,31 @@ curl http://localhost:8080/openapi.yaml
 Логирование
 
 Все запросы логируются в файле логов. Используется стандартный логгер, который может быть настроен для вывода в файл.
+
+# 1. Создать список
+LIST_ID=$(curl -X POST http://localhost:8080/api/v1/lists \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Покупки"}' | jq -r '.id')
+
+# 2. Создать задачу
+TASK_ID=$(curl -X POST http://localhost:8080/api/v1/lists/$LIST_ID/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Купить молоко"}' | jq -r '.id')
+
+# 3. Получить задачи списка
+curl "http://localhost:8080/api/v1/lists/$LIST_ID/tasks"
+
+# 4. Отметить выполненной
+curl -X PATCH "http://localhost:8080/api/v1/tasks/$TASK_ID" \
+  -H "Content-Type: application/json" \
+  -d '{"completed":true}'
+
+# 5. Удалить задачу
+curl -X DELETE "http://localhost:8080/api/v1/tasks/$TASK_ID"
+
+
+go test ./internal/storage/postgres -tags=integration -bench=. -benchtime=3s - Запуск бенчмарка
+
+go test ./internal/storage/postgres -tags=integration -v  - запуск теста
+
+go test ./internal/service -v

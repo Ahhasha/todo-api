@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	_ "todo-api/docs"
 	"todo-api/internal/http/handlers"
 	"todo-api/internal/http/middleware"
 
@@ -25,7 +26,7 @@ func NewRouter(listHandler *handlers.ListHandler, taskHandler *handlers.TaskHand
 			r.Patch("/{id}", listHandler.UpdateList)
 			r.Delete("/{id}", listHandler.Delete)
 		})
-		r.Route("/api/v1/lists/{listID}/tasks", func(r chi.Router) {
+		r.Route("/lists/{listID}/tasks", func(r chi.Router) {
 			r.Post("/", taskHandler.CreateTask)
 			r.Get("/", taskHandler.ListTasks)
 		})
@@ -39,7 +40,9 @@ func NewRouter(listHandler *handlers.ListHandler, taskHandler *handlers.TaskHand
 	})
 
 	r.Get("/openapi.yaml", handlers.OpenAPISpec)
-	r.Get("/swagger/index.html", httpSwagger.WrapHandler)
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/openapi.yaml"),
+	))
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})

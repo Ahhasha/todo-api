@@ -1,0 +1,187 @@
+{
+  "info": {
+    "name": "Todo API",
+    "_postman_id": "c5a72e6f-9a9a-4c21-b02a-47a4e9b17792",
+    "description": "Postman коллекция для тестирования Lists & Tasks API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "listId",
+      "value": ""
+    },
+    {
+      "key": "taskId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Lists",
+      "item": [
+        {
+          "name": "Create List",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Покупки\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/lists"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.environment.set('listId', json.id);",
+                  "console.log('listId:', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Lists",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/lists"
+          }
+        },
+        {
+          "name": "Get List by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/lists/{{listId}}"
+          }
+        },
+        {
+          "name": "Update List",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Домашние дела\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/lists/{{listId}}"
+          }
+        },
+        {
+          "name": "Delete List",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/lists/{{listId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Create Task in List",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Купить молоко\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/lists/{{listId}}/tasks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.environment.set('taskId', json.id);",
+                  "console.log('taskId:', json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Tasks in List",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/lists/{{listId}}/tasks"
+          }
+        },
+        {
+          "name": "Get Task by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}"
+          }
+        },
+        {
+          "name": "Update Task - Mark Complete",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"completed\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}"
+          }
+        },
+        {
+          "name": "Update Task - Change Text",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Купить хлеб и молоко\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}"
+          }
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/tasks/{{taskId}}"
+          }
+        }
+      ]
+    }
+  ]
+}

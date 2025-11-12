@@ -9,7 +9,7 @@ RUN go mod download
 
 # Копируем весь код
 COPY . .
-
+COPY docs/ ./docs/
 # Собираем бинарник
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/service ./cmd
 
